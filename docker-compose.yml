@@ -31,6 +31,8 @@ services:
       - "5000:5000"
     expose:
       - "5000"
+    networks:
+      - esnet
 
 volumes:
   esdata1:
