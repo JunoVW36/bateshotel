@@ -1,8 +1,9 @@
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
 <style>
     #map-canvas, body, html {
-    height: 100%;
-    width: 100%;
-}
+        height: 100%;
+    }
 </style>
 
 <script type="text/javascript"
@@ -23,41 +24,59 @@
         var bounds = new google.maps.LatLngBounds();
 
         var Httpreq = new XMLHttpRequest(); // a new request
-        Httpreq.open("GET","/geofencing/polygon",false);
+        Httpreq.open("GET","/geofencing/api/search-places?coordinates={{coordinates}}",false);
         Httpreq.send(null);
         polygons = JSON.parse(Httpreq.responseText);
         
+        var coordinates = "{{coordinates}}";
+        if (coordinates !== "None") {
+            let splittedCoordinates = coordinates.split(",");
+            let lat = parseFloat(splittedCoordinates[0]);
+            let long = parseFloat(splittedCoordinates[1]);
+            var myLatLng = {lat: lat, lng: long};
+            var marker = new google.maps.Marker({
+                position: myLatLng,
+                map: map,
+                title: 'Here I am!'
+            });
+        }
 
-        colors = [
-            "#ff0000", 
-            "#00ff00", 
-            "#0000ff",
+        var ulist = document.getElementById("names");
+        var colors = [
             "#001f3f",
             "#0074D9",
             "#7FDBFF",
             "#39CCCC",
             "#3D9970",
             "#2ECC40",
+            "#01FF70",
             "#FFDC00",
             "#FF851B",
+            "#FF4136",
             "#85144b",
             "#F012BE",
             "#B10DC9",
-            "#fd79a8",
-            "#ffeaa7",
-            "#00cec9",
-            "#6c5ce7",
-            "#55efc4",
-            "#d63031",
-            "#3c40c6",
-            "#f53b57"
+            "#fdadc7",
+            "#993399",
+            "#ea4c88",
+            "#ffa258",
+            "#ff7777",
+            "#65c0ba",
         ];
         for (var i = 0; i < polygons.length; i++) {
+            let color = colors[Math.floor(Math.random()*colors.length)];
+            colors = colors.filter(c => {console.log(c, c != color); return c != color});
+            if (polygons[i].name) {
+                let elem = document.createElement("li");
+                elem.appendChild(document.createTextNode(polygons[i].name));
+                elem.setAttribute("style", "color: " + color);
+                ulist.appendChild(elem);
+            }
             arr = [];
-            if (!polygons[i].coordinates) {
+            if (!polygons[i].location) {
                 continue;
             }
-            var coordinates = polygons[i].coordinates[0];
+            var coordinates = polygons[i].location.coordinates[0];
             for (var j=0; j < coordinates.length; j++) {
                 arr.push( new google.maps.LatLng(
                     parseFloat(coordinates[j][1]),
@@ -65,7 +84,6 @@
                 ));
                 bounds.extend(arr[arr.length-1])
             }
-            var color = colors[Math.floor(Math.random()*colors.length)];
             polygons.push(new google.maps.Polygon({
                 paths: arr,
                 strokeColor: color,
@@ -76,30 +94,21 @@
             }));
             polygons[polygons.length-1].setMap(map);
         }
+        
         map.fitBounds(bounds);
-    }
-    /**
-    * Parses the given XML string and returns the parsed document in a
-    * DOM data structure. This function will return an empty DOM node if
-    * XML parsing is not supported in this browser.
-    * @param {string} str XML string.
-    * @return {Element|Document} DOM.
-    */
-    function xmlParse(str) {
-    if (typeof ActiveXObject != 'undefined' && typeof GetObject != 'undefined') {
-        var doc = new ActiveXObject('Microsoft.XMLDOM');
-        doc.loadXML(str);
-        return doc;
-    }
-
-    if (typeof DOMParser != 'undefined') {
-        return (new DOMParser()).parseFromString(str, 'text/xml');
-    }
-
-    return createElement('div', null);
     }
 
     google.maps.event.addDomListener(window, 'load', initialize);
 </script>
 
-<div id="map-canvas" ></div>
+<div class="container">
+    <div class="row">
+        <div class="col col-10">
+            <div id="map-canvas"></div>
+        </div>
+        <div class="col-2">
+            <ul id="names">
+            </ul>
+        </div>
+    </div>
+</div>
