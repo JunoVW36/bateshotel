@@ -11,3 +11,6 @@ Assuming you have installed **python3**, **docker**, **virtualenv** and **pip**:
 * pip install -r requirements.txt
 * docker-compose build
 * docker-compose up
+
+## Presentation
+The presentation which gave birth to this little project is located [here](https://github.com/krsarmiento/bateshotel/blob/develop/Pre%CC%81sentation.pdf).
